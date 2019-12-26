@@ -1,0 +1,13 @@
+.DS_Store
+packages/
+paket-files/
+paket.local
+
+node_modules/
+
+obj/
+bin/
+output/
+.fake/
+temp/
+.ionide/

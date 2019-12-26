@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="wrappers/Monaco.fs" />
+    <Compile Include="Parsec.fs" />
+    <Compile Include="Sanuki.fs" />
+    <Compile Include="Utils.fs" />
+    <Compile Include="MonacoHelper.fs" />
+    <Compile Include="App.fs" />
+  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>
