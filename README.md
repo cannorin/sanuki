@@ -1,35 +1,196 @@
-# Fulma minimal template
+SAnuki Intermediate Language for Udon
+=====================================
 
-This template setup a minimal application using [Fable](http://fable.io/), [Elmish](https://fable-elmish.github.io/) and [Fulma](https://mangelmaxime.github.io/Fulma/).
+SAnuki って何？ それはより高級なプログラム言語を作るための "中間言語" です
 
-## How to use ?
+スタック (Stack) とアドレス (Addresses) の管理を自動化したので SAnuki
+それ以外は Udon Assembly (UAssembly) そのままで，for も while も型推論もないのでこいつでプログラム書くのは厳しい
 
-### Architecture
+ではなぜ公開するのか？人間でもかろうじて使用可能な最低レベルの言語でも，
+できるだけ早めに公開することに意味があると思うからです
 
-- Entry point of your application is `src/App.fs`
-- We are using [hmtl-webpack-plugin](https://github.com/jantimon/html-webpack-plugin) to make `src/index.html` the entry point of the website
-- Entry point of your style is `src/scss/main.scss`
-    - [Bulma](https://bulma.io/) and [Font Awesome](https://fontawesome.com/) are already included
-    - We are supporting both `scss` and `sass` (by default we use `scss`)
-- Static assets (favicon, images, etc.) should be placed in the `static` folder
+質問は [twitter: @cannorin_vrc](https://twitter.com/cannorin_vrc) までお気軽にどうぞ これをベースにまともな言語を作っています
 
-### In development mode
 
-*If you are using Windows replace `./fake.sh` by `fake.cmd`*
+[オンラインコンパイラ](https://7colou.red/sanuki/)があります 右側にリアルタイムで UAssembly に変換されます パースエラー・コンパイルエラーはハイライトされます
 
-1. Run: `./fake.sh build -t Watch`
-2. Go to [http://localhost:8080/](http://localhost:8080/)
+コンパイルに成功したらアドレス欄にソースコードがエンコードされて保存されるので，
+コピペすれば保存・シェアできます
 
-*On Unix you may need to run `chmod a+x fake.sh`*
+## チュートリアル (雑)
 
-In development mode, we activate:
+```
+# # で始まるのはコメント
 
-- [Hot Module Replacement](https://fable-elmish.github.io/hmr/), modify your code and see the change on the fly
-- [Redux debugger](https://fable-elmish.github.io/debugger/), allow you to debug each message in your application using [Redux dev tool](https://github.com/reduxjs/redux-devtools)
+# インデントは自由
 
-### Build for production
+# 変数定義ステートメント
+#
+#   let 名前 : 型 = リテラル
+#
+let foo : SystemInt32 = 0
 
-*If you are using Windows replace `./fake.sh` by `fake.cmd`*
+# リテラルは
+# * 整数 (10進数/16進数)
+# * 小数
+# * "文字列"
+# * this
+# * null
+# * @<ラベル名>
+# の6種類
+# 注意:
+# * 整数リテラルが使えるのは SystemInt32, SystemUInt32 だけで SystemInt64 とかは使えない
+#   - これは変換先である UAssembly のアセンブラがそれしか認識してくれないため クソだね
+# * ラベル名は型を SystemUInt32 にする必要がある
+# * 文字列は \n 以外のエスケープシーケンスが使えない
+#   - これは変換先である UAssembly のパーサが文字列のパースをサボっているため クソだね2
 
-1. Run: `./fake.sh build`
-2. All the files needed for deployment are under the `output` folder.
+# let に sync<メソッド> を付けると出力に .sync 変数名, メソッド が追記される
+#
+# sync[Property]<Method> とすると
+#   .sync bar->Property, Method
+# になる
+let sync<SomeMethod> bar : SystemInt32 = 0
+
+# let に pub を付けると出力に .export 変数名 が追記される
+# pub と sync 両方使うときは let pub sync<Method> .. と書く
+let pub baz : SystemInt32 = 42
+
+# 16進数の整数リテラルは 0x を付ける
+let returnAddr : SystemUInt32 = 0x0
+
+# gotoステートメント 指定したラベルにジャンプ
+# ラベルは goto より下で定義されていても構わない
+goto @_start
+
+# ラベル定義ステートメント
+# ラベル名には前に @ を付ける
+label @func
+  # 変数定義はどこでもできる
+  let msg:SystemString = "Hello, World!"
+
+  # call ステートメント extern 関数を呼ぶ
+  #
+  #   call 関数名 変数1 変数2 ...
+  #
+  # 引数には変数しか使えない．なぜなら関数によっては最後の引数に与えた変数に結果が代入されたり，途中の引数の値を無造作にいじったりするから
+  # 各関数が引数をどう扱うかは関数名からはわからないので覚えるしかない
+  # でもどこにも書いてないので SDK をリバースエンジニアリングしない限りわからない クソだね3
+  call UnityEngineDebug.__Log__SystemObject__SystemVoid msg
+
+  # 間接 goto ステートメント
+  #
+  #   goto_indirect SystemUInt32型の変数
+  #
+  # 変数に入ってるアドレスに向かって飛ぶ
+  goto_indirect returnAddr
+
+# ラベル定義も変数定義と同様に，pub を付けると出力に .export ラベル名 が追記される
+# ラベルには sync はない
+label pub @_start
+  let x : SystemBoolean = null
+
+  # このようにラベルのアドレスを SystemUInt32 の変数に突っ込むことができる
+  let nextAddr : SystemUInt32 = @next
+
+  # 条件付き goto ステートメント
+  #
+  #   goto_if_false SystemBoolean型の変数 ラベル
+  #
+  # 変数が false (null) のときにラベルに飛ぶ
+  goto_if_false x @foo
+
+  goto @next
+  label @foo
+
+  # 代入ステートメント
+  #
+  #   set コピー先の変数 コピー元の変数
+  #
+  # コピー元の変数の値をコピー先の変数にコピーする
+  set returnAddr nextAddr
+
+  goto @func
+  label @next
+
+  # exit ステートメント
+  # プログラムを終了
+  exit
+
+# このほかに UAssembly と同じ push 変数, pop, copy ステートメントがある
+# また call で引数の変数を一個も与えなければ UAssembly の extern と同じ動きになる
+# UAssembly のスーパーセットにするために入れてる
+```
+
+## ライブラリとして
+
+こいつの本質は
+
+``` fsharp
+module Ast =
+  type Literal<'label> =
+    | This
+    | Null
+    | IntLiteral of int
+    | StringLiteral of string
+    | FloatLiteral of float
+    | Label of 'label
+
+  type Expr<'Label> =
+    | Var of name:string
+  type ExprWithInfo<'Label, 'Info> = With<Expr<'Label>, 'Info>
+
+  [<RequireQualifiedAccess>]
+  type VariableSyncType =
+    | None
+    | Itself of interpolationAlgorithmName:string
+    | Property of prop:string * interpolationAlgorithmName:string
+
+  type Stmt<'Label, 'Info> =
+    | DefineVar of ty:string * var:string * isPublic:bool * sync:VariableSyncType * With<Literal<'Label>, 'Info>
+    | DefineLabel of name:string * isPublic:bool
+    | Call of funcName:string * args:ExprWithInfo<'Label, 'Info> list
+    | Assign of var:string * ExprWithInfo<'Label, 'Info>
+    | Goto of label:string
+    | GotoIfFalse of cond:ExprWithInfo<'Label, 'Info> * label:string
+    | GotoIndirect of ExprWithInfo<'Label, 'Info>
+    | Push of arg:ExprWithInfo<'Label, 'Info>
+    | Pop
+    | Copy
+    | Exit
+    | Comment of string
+  and StmtWithInfo<'Label, 'Info> = With<Stmt<'Label, 'Info>, 'Info>
+
+  type Program<'info> = StmtWithInfo<string, 'info> list
+```
+
+の `Program<'info>` を
+
+```fsharp
+module Compiler =
+  type [<Measure>] addr
+
+  type VarTable<'Label> = Map<string, int<addr> * string * bool * Ast.VariableSyncType * Ast.Literal<'Label>>
+  type LabelTable = Map<string, int<addr> * bool>
+
+  type Op =
+    | Nop
+    | Push of int<addr>
+    | Pop
+    | Jump of int<addr>
+    | JumpIf of int<addr>
+    | JumpIndirect of int<addr>
+    | Extern of string
+    | Copy
+    | Label of string
+
+  type Assembly = VarTable<int<addr>> * LabelTable * Op list
+```
+
+の `Assembly` に変換するライブラリであることです
+
+UAssembly のアセンブラ言語も，UdonVM のバイナリも吐けます（ヒープの扱いが面倒ですが）
+
+`Program<'info>` に手書き用の構文を定義して，パーサと Web のガワを付けてリリースしたのがこれです
+
+
