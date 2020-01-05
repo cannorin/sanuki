@@ -1,4 +1,6 @@
 Fable.Core
+Fable.Promise
+Fable.Fetch
 Fable.Elmish
 Fable.Elmish.React
 Fable.Elmish.Browser

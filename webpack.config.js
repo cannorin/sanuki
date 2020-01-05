@@ -3,26 +3,77 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 var babelOptions = {
     presets: [
-        ["@babel/preset-env", {
-            "targets": {
-                "browsers": ["last 2 versions"]
-            },
-            "modules": false,
-            "useBuiltIns": "usage",
-            "corejs": 3,
-            // This saves around 4KB in minified bundle (not gzipped)
-            // "loose": true,
-        }]
+        [ "@babel/preset-react",
+          // "@babel/preset-env", {
+          //   "targets": {
+          //       "browsers": ["last 2 versions"]
+          //   },
+          //   "modules": false,
+          //   "useBuiltIns": "usage",
+          //   "corejs": 3,
+          //   // This saves around 4KB in minified bundle (not gzipped)
+          //   // "loose": true,
+          // }
+        ]
     ],
+    plugins: [
+        "@babel/plugin-proposal-class-properties"
+    ]
 };
 
 var commonPlugins = [
     new HtmlWebpackPlugin({
         filename: './index.html',
         template: './src/index.html'
+    }),
+    new MonacoWebpackPlugin({
+        languages: [
+        ],
+        features: [
+            'accessibilityHelp',
+            'bracketMatching',
+            'caretOperations',
+            'clipboard',
+            'codelens',
+            'colorDetector',
+            'comment',
+            'contextmenu',
+            // 'coreCommands',
+            'cursorUndo',
+            // 'dnd',
+            'find',
+            // 'folding',
+            // 'format',
+            // 'goToDefinitionCommands',
+            // 'goToDefinitionMouse',
+            // 'gotoError',
+            // 'gotoLine',
+            // 'hover',
+            'inPlaceReplace',
+            'inspectTokens',
+            // 'iPadShowKeyboard',
+            'linesOperations',
+            'links',
+            'multicursor',
+            'parameterHints',
+            // 'quickCommand',
+            // 'quickFixCommands',
+            // 'quickOutline',
+            // 'referenceSearch',
+            // 'rename',
+            'smartSelect',
+            // 'snippets',
+            'suggest',
+            'toggleHighContrast',
+            'toggleTabFocusMode',
+            'transpose',
+            'wordHighlighter',
+            'wordOperations'
+        ]
     })
 ];
 
@@ -54,7 +105,7 @@ module.exports = (env, options) => {
                 ]
             },
         output: {
-            path: path.join(__dirname, './output'),
+            path: path.join(__dirname, './docs'),
             filename: isProduction ? '[name].[hash].js' : '[name].js'
         },
         plugins: isProduction ?
@@ -97,7 +148,17 @@ module.exports = (env, options) => {
                     },
                 },
                 {
-                    test: /\.(sass|scss|css)$/,
+                    test: /\.sass$/,
+                    use: [
+                        isProduction
+                            ? MiniCssExtractPlugin.loader
+                            : 'style-loader',
+                        'css-loader',
+                        'sass-loader',
+                    ],
+                },
+                {
+                    test: /\.scss$/,
                     use: [
                         isProduction
                             ? MiniCssExtractPlugin.loader

@@ -10,8 +10,8 @@ type RegExp = System.Text.RegularExpressions.Regex
 let [<Import("*","monaco-editor")>] monaco: Monaco.IExports = jsNative
 
 module Monaco =
-    let [<Import("editor","monaco-editor/monaco")>] editor: Editor.IExports = jsNative
-    let [<Import("languages","monaco-editor/monaco")>] languages: Languages.IExports = jsNative
+    let [<Import("editor","monaco-editor")>] editor: Editor.IExports = jsNative
+    let [<Import("languages","monaco-editor")>] languages: Languages.IExports = jsNative
 
     type [<AllowNullLiteral>] IExports =
         abstract Emitter: EmitterStatic
@@ -407,13 +407,13 @@ module Monaco =
     /// A range in the editor. This interface is suitable for serialization.
     type [<AllowNullLiteral>] IRange =
         /// Line number on which the range starts (starts at 1).
-        abstract startLineNumber: float
+        abstract startLineNumber: float with get,set
         /// Column on which the range starts in line `startLineNumber` (starts at 1).
-        abstract startColumn: float
+        abstract startColumn: float with get,set
         /// Line number on which the range ends.
-        abstract endLineNumber: float
+        abstract endLineNumber: float with get,set
         /// Column on which the range ends in line `endLineNumber`.
-        abstract endColumn: float
+        abstract endColumn: float with get,set
 
     /// A range in the editor. (startLineNumber,startColumn) is <= (endLineNumber,endColumn)
     type [<AllowNullLiteral>] Range =

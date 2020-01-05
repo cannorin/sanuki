@@ -8,6 +8,7 @@
     <Compile Include="Sanuki.fs" />
     <Compile Include="Utils.fs" />
     <Compile Include="MonacoHelper.fs" />
+    <Compile Include="ReactEditor.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />

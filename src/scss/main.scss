@@ -1,7 +1,232 @@
-$fa-font-path: "~@fortawesome/fontawesome-free/webfonts/";
-@import '~@fortawesome/fontawesome-free/scss/fontawesome.scss';
-@import "~@fortawesome/fontawesome-free/scss/solid.scss";
-@import "~@fortawesome/fontawesome-free/scss/regular.scss";
-@import "~@fortawesome/fontawesome-free/scss/brands.scss";
+@import './_variables';
+@import '~bulma/bulma';
+@import './monaco-editor-hover-content.sass';
+@import '~bulma-switch/dist/css/bulma-switch.sass';
+@import './menu-group';
+@import './toast.scss';
+@import './scrollable-panel.scss';
 
-@import '~bulma/bulma.sass';
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts/";
+@import '~@fortawesome/fontawesome-free/scss/fontawesome';
+@import '~@fortawesome/fontawesome-free/scss/solid';
+@import '~@fortawesome/fontawesome-free/scss/regular';
+@import '~@fortawesome/fontawesome-free/scss/brands';
+
+$tabs-header-height: 42px;
+
+html {
+    overflow-y: hidden;
+
+    &.has-navbar-fixed-top {
+        padding-top: 0;
+
+        body {
+            padding-top: 0;
+            margin-top: 3.25rem;
+        }
+    }
+}
+
+// is-loading on any element, from https://github.com/jgthms/bulma/issues/847#issuecomment-314110630
+div.is-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.5;
+    &:after {
+        @include loader;
+        position: absolute;
+        top: calc(50% - 2.5em);
+        left: calc(50% - 2.5em);
+        width: 5em;
+        height: 5em;
+        border-width: 0.25em;
+    }
+}
+
+.field.has-addons {
+    .control.is-expanded {
+        .button {
+            border-left-color: #dbdbdb;
+        }
+    }
+}
+
+.page-content {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        flex: none;
+        background-color: $card-header-background-color;
+
+        &.is-expanded {
+            width: 250px;
+
+            .actions-area {
+                display: flex;
+                justify-content: space-evenly;
+            }
+
+            .widgets-list .action-button {
+                height: $icon-dimensions-large;
+                justify-content: center;
+                align-items: center;
+                display: flex;
+            }
+        }
+
+        .brand {
+            height: $icon-dimensions-large;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: .5rem;
+            padding-bottom: .5rem;
+            box-shadow: -1px 0px 1px 0px #f2f2f2;
+
+            img {
+                width: 32px;
+            }
+
+            h4 {
+                text-align: center;
+                width: 50%;
+            }
+        }
+
+        &.is-collapsed {
+            .widgets-list .action-button {
+                height: $icon-dimensions-large;
+                width: $icon-dimensions-large;
+                justify-content: center;
+                align-items: center;
+                display: flex;
+            }
+        }
+
+        .widgets-list {
+            overflow-y: auto;
+            flex: 1 1 0%;
+            max-height: calc(100vh - #{$navbar-height} - $icon-dimensions-large);
+        }
+
+        .item {
+            &:hover {
+                background-color: $info;
+                color: $white;
+
+                .item-content {
+                    display: block;
+                    transform: translate3d($icon-dimensions-large, -$icon-dimensions-large, 0);
+                    position: fixed;
+                    z-index: 2;
+                }
+            }
+
+            .item-content {
+                display: none;
+                width: 250px;
+                border-right: 1px solid rgba(0, 0, 0, 0.1);
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        .card-header {
+            cursor: pointer;
+        }
+    }
+
+    .main-content {
+        display: flex;
+        width: 100%;
+
+        .tabs {
+            margin-bottom: 0;
+            height: $tabs-header-height;
+        }
+
+        .horizontal-resize {
+            width: 4px;
+            margin-left: -2px;
+            background-color: $resize-background;
+            cursor: ew-resize;
+            z-index: 1000;
+        }
+
+        .vertical-resize {
+            height: 6px;
+            margin-top: -3px;
+            background-color: $resize-background;
+            cursor: ns-resize;
+            z-index: 1000;
+        }
+
+        .vertical-panel {
+            display: flex;
+            flex-grow: 1;
+            flex-direction: column;
+
+            .tabs {
+                min-height: 42px;
+            }
+
+            .react-editor {
+                flex-grow: 1;
+            }
+        }
+
+        .collapse-control {
+            position: absolute;
+            z-index: 1000;
+        }
+
+        .output-container {
+            display: flex;
+            flex-direction: column;
+
+            .output-content {
+
+                .tabs {
+                    min-height: 42px;
+                }
+
+                display: flex;
+                flex-grow: 1;
+                flex-direction: column;
+
+                .editor-output {
+                    // min-height: calc(100% - #{$tabs-header-height});
+
+                }
+
+                .react-editor {
+                    flex-grow: 1;
+                }
+
+                iframe {
+                    width: 100%;
+                    // height: calc(100% - #{$tabs-header-height});
+                    flex: 1 1 0%;
+                    background-color: white;
+                }
+            }
+
+        }
+    }
+}
+
+.monaco-editor {
+    .context-view {
+        z-index: 12000;
+        position: fixed;
+    }
+    .monaco-editor-hover {
+        z-index: 12000;
+    }
+    .suggest-widget {
+        z-index: 12000;
+    }
+}

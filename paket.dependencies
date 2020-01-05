@@ -4,6 +4,8 @@ framework: netstandard2.0
 
 nuget FSharp.Core redirects:force
 nuget Fable.Core
+nuget Fable.Promise
+nuget Fable.Fetch
 nuget Fable.Elmish
 nuget Fable.Elmish.React
 nuget Fable.Elmish.Browser
